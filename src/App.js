@@ -1,103 +1,97 @@
-import logo from './logo.svg';
 import './App.css';
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from 'axios';
+import Fetch from './Fetch'
 
-function NameProbGet ({ url }) {
-  const [response, setResponse] = useState('');
-
-  useEffect(() => {
-    (function () {
-      return fetch(url)
-            .then((res) => res.text())
-            .then((data) => setResponse(data));
-    })()
-  }, [url])
+function LinkInput() {
+  const [link, setLink] = React.useState('');
+  const [result, setResult] = React.useState('');
 
   return (
-    <div>
-      Get i Fetch:<br/>
-      {response}
+    <div className='container'>
+      <label>
+        Link:&nbsp;
+        <input type="url" name="link" value={link} 
+        onChange={(e) => {
+          setLink(e.target.value);
+        }}
+        onBlur={(e) => {
+          axios.post('http://localhost:3001/link', {'link': link})
+          .then((res) => setResult(res.data));
+        }}/>
+      </label>
+      {result !== '' && <span>Odpowiedź: {result}</span>}
     </div>
   );
 }
 
-function NameProbAxiosGet ({ url }) {
-  const [response, setResponse] = useState('');
-
-  useEffect(() => {
-    (function () {
-      return axios.get(url)
-            .then(res => setResponse(res.data))
-    })()
-  }, [url])
+function RadioInput() {
+  const [term, setTerm] = React.useState();
+  const terms = ['rok', '24h'];
 
   return (
-    <p>
-      Post i Fetch:<br/>
-      {response}
-    </p>
-  );
-}
-
-function NameProbPost ({ url, name }) {
-  const [response, setResponse] = useState('');
-
-  useEffect(() => {
-    const nameObj = {name: name};
-    
-    (function () {
-      return fetch(url, {
-        method: 'POST',
-        //mode: 'cors',
-        cache: 'no-cache',
-        //credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        //redirect: 'follow',
-        referrerPolicy: 'no-referrer',
-        body: JSON.stringify(nameObj),
-      })
-        .then(res => res.text())
-        .then(data => setResponse(data));
-    })()
-  }, [url, name])
-
-  return (
-    <div>
-      Get i Axios:<br/>
-      {response}
+    <div className='container'>
+      Termin dostępności:
+      {terms.map((option) => (
+        <label key={option}>
+          <input type="radio" name="deadline" value={option} checked={term === option} 
+          onChange={(e) => {
+            setTerm(e.target.value);
+          }}/>
+          &nbsp;{option}
+        </label>
+      ))}
+      {term !== undefined && <span>Wynik: {term}</span>}
     </div>
   );
 }
 
-function NameProbAxiosPost ({ url, name }) {
-  const [response, setResponse] = useState('');
-
-  useEffect(() => {
-    (function () {
-      return axios.post(url, {name: name})
-            .then(res => setResponse(res.data))
-    })()
-  }, [url, name])
+function CheckboxInput() {
+  const defaultColors = {
+    red: false,
+    green: false,
+    blue: false,
+  };
+  const translation = {
+    red: 'czerwony',
+    green: 'zielony',
+    blue: 'niebieski',
+  };
+  const colorsList = Object.keys(defaultColors);
+  const [colors, setColors] = React.useState(defaultColors);
 
   return (
-    <p>
-      Post i Axios:<br/>
-      {response}
-    </p>
+    <div className='container'>
+      Kolory w tle:
+      {colorsList.map((option) => (
+        <label key={option}>
+          <input type="checkbox" name="color" value={option} 
+          checked={colors[option] === true} 
+          onChange={(e) => {
+            setColors({
+              ...colors,
+              [option]: e.target.checked,
+            });
+          }}/>
+          &nbsp;{translation[option]}
+        </label>
+      ))}
+      <span>Wynik: {JSON.stringify(colors)}</span>
+    </div>
   );
 }
 
 function App() {
+
   return (
     <>
-    <NameProbGet url={"http://localhost:3001/name-probability/Jakub"}/>
-		<NameProbAxiosGet url={"http://localhost:3001/name-probability/Axios"}/>
-		<br/>
-    <NameProbPost url={"http://localhost:3001/name-probability"} name={"Jakub"}/>
-    <NameProbAxiosPost url={"http://localhost:3001/name-probability"} name={"Axios"}/>
+    <form className='Form'>
+      <LinkInput/>
+      <RadioInput/>
+      <CheckboxInput/>
+    </form>
+    {/* <br/>
+    <Fetch /> */}
     </>
   );
 }
